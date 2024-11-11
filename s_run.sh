@@ -1,3 +1,4 @@
 #!/bin/bash
-
-cargo run -p quick_chat_s
+echo ""
+cargo run --quiet -p quick_chat_s
+echo ""
