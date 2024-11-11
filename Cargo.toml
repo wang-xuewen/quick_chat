@@ -3,3 +3,4 @@ members = [
     "quick_chat_s",
     "quick_chat_c"
 ]
+resolver = "2"
