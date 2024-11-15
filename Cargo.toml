@@ -3,4 +3,4 @@ members = [
     "quick_chat_s",
     "quick_chat_c"
 ]
-resolver = "2"
+resolver = "2" #启用了更智能的依赖解析，有助于避免多包环境下的依赖冲突
