@@ -1,8 +1,13 @@
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
+use quick_chat_lib::greet;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+
+    let message = greet("Rust");
+        println!("{}", message);
+
     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     let (reader, mut writer) = stream.into_split();
 

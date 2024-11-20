@@ -169,8 +169,13 @@ name = "quick_chat_c"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "quick_chat_lib",
  "tokio",
 ]
+
+[[package]]
+name = "quick_chat_lib"
+version = "0.1.0"
 
 [[package]]
 name = "quick_chat_s"

@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
+quick_chat_lib = { path = "../quick_chat_lib" }
