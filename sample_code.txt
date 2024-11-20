@@ -211,3 +211,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // 在此处理加密后的流数据
     }
 }
+
+
+// 检测消息丢失
+    if let Err(err) = rx.recv().await {
+        if let broadcast::error::RecvError::Lagged(n) = err {
+            eprintln!("Warning: Lagged by {} messages", n); // 打印丢弃的消息数量
+        }
+    }
