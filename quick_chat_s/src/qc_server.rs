@@ -45,13 +45,12 @@ async fn handle_client(
     socket: tokio::net::TcpStream,
     tx: Arc<Mutex<broadcast::Sender<String>>>,
 ) -> Result<()> {
-    match socket.peer_addr() {
-        Ok(peer_addr) => {
-            println!("Client connected from: {}", peer_addr);
-        }
-        Err(e) => {
-            eprintln!("Failed to get peer address: {}", e);
-        }
+    // task::block_in_place() 会在一个专门的线程池中执行同步代码，而不会阻塞当前的异步任务所在的线程。
+    // 也就是说，socket.peer_addr() 的执行会被阻塞到一个独立的线程中，不会占用 Tokio 的异步线程。
+    let peer_addr = tokio::task::block_in_place(|| socket.peer_addr());
+
+    if let Ok(peer_addr) = peer_addr {
+        println!("Client connected from: {}", peer_addr);
     }
 
     let (reader, mut writer) = socket.into_split();
