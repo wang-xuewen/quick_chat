@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use log::{error, info};
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
@@ -16,7 +17,7 @@ impl QcServer {
             .await
             .context("Failed to bind TCP listener")?;
 
-        println!("bind: {}", address.to_string());
+        info!("bind: {}", address.to_string());
 
         let (tx, _) = broadcast::channel(10000);
         Ok(QcServer {
@@ -34,7 +35,7 @@ impl QcServer {
             // 启动一个新的异步任务来处理每个连接
             tokio::spawn(async move {
                 if let Err(e) = handle_client(socket, tx).await {
-                    eprintln!("Client handler failed: {}", e);
+                    error!("Client handler failed: {}", e);
                 }
             });
         }
@@ -50,7 +51,7 @@ async fn handle_client(
     let peer_addr = tokio::task::block_in_place(|| socket.peer_addr());
 
     if let Ok(peer_addr) = peer_addr {
-        println!("Client connected from: {}", peer_addr);
+        info!("Client connected from: {}", peer_addr);
     }
 
     let (reader, mut writer) = socket.into_split();
@@ -65,14 +66,14 @@ async fn handle_client(
                 match result {
                     Ok(value) if value == 0 => break,// 客户端关闭连接
                     Err(e) => {
-                        eprintln!("Read line Error: {}", e);
+                        error!("Read line Error: {}", e);
                         break;
                     },
                     Ok(_) => (),
                 }
 
                 if let Err(e)=tx.lock().await.send(line.clone()) {
-                    eprintln!("tx send Error: {}", e);
+                    error!("tx send Error: {}", e);
                 }
                 line.clear(); // 清空行缓存
             }
@@ -83,7 +84,7 @@ async fn handle_client(
                         writer.write_all(value.as_bytes()).await?
                     },
                     Err(e) => {
-                        eprintln!("rx recv Error: {}", e);
+                        error!("rx recv Error: {}", e);
                         break;
                     },
                 }

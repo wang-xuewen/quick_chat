@@ -1,0 +1,27 @@
+appenders:
+  stdout:
+    kind: console
+    encoder:
+      pattern: "[{d(%Y-%m-%dT%H:%M:%S%.6f)} {l:<5.5} {t}] {m}{n}"
+    filters:
+      - kind: threshold
+        level: debug
+  info_file:
+    kind: rolling_file
+    path: "log/info.log"
+    encoder:
+      pattern: "[{d(%Y-%m-%dT%H:%M:%S%.6f)} {l:<5.5} {t}] {m}{n}"
+    policy:
+      trigger:
+        kind: time
+        interval: 1 day
+      roller:
+        kind: fixed_window
+        pattern: "log/info-{}.log"
+        base: 0
+        count: 7
+root:
+  level: debug
+  appenders:
+    - stdout
+    - info_file

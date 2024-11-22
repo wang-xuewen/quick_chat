@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use log::info;
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 
@@ -10,7 +11,7 @@ impl QcClient {
             .await
             .context("Failed to connect qc server")?;
 
-        println!("connect to: {}", address.to_string());
+        info!("connect to: {}", address.to_string());
         let (reader, mut writer) = stream.into_split();
 
         let mut stdin_reader = BufReader::new(io::stdin()).lines();
@@ -26,7 +27,7 @@ impl QcClient {
                 }
                 Ok(line) = server_reader.next_line() => {
                     if let Some(line) = line {
-                        println!("Server: {}", line);
+                        info!("message from server: {}", line);
                     }
                 }
             }
