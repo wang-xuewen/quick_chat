@@ -1,5 +1,7 @@
 use anyhow::{Context, Result};
 use log::info;
+use qc_lib::QcMessage;
+use serde_json;
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 
@@ -21,13 +23,30 @@ impl QcClient {
             tokio::select! {
                 Ok(line) = stdin_reader.next_line() => {
                     if let Some(line) = line {
-                        writer.write_all(line.as_bytes()).await?;
+                        let qc_message = QcMessage {
+                            nick_name: String::from("Alice"),
+                            message: String::from(&line),
+                        };
+                        // 序列化为 Vec<u8>
+                        // let serialized = bincode::serialize(&qc_message).expect("Failed to serialize");
+                        let serialized = serde_json::to_string(&qc_message).expect("Failed to serialize");
+
+
+                        // 转换为 &[u8]
+                        // let bytes: &[u8] = &serialized;
+
+                        writer.write_all(serialized.as_bytes()).await?;
                         writer.write_all(b"\n").await?;
                     }
                 }
                 Ok(line) = server_reader.next_line() => {
                     if let Some(line) = line {
-                        info!("message from server: {}", line);
+
+                        // 反序列化
+                        let qc_message: QcMessage = serde_json::from_str(&line).expect("Failed to deserialize");
+                        // let deserialized: QcMessage = bincode::deserialize(&serialized).expect("Failed to deserialize");
+
+                        info!("message from server: {}", qc_message.message);
                     }
                 }
             }

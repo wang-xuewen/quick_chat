@@ -1,5 +1,8 @@
 use anyhow::{Context, Result};
 use log::{error, info};
+use qc_lib::QcMessage;
+// use serde::Deserialize;
+use serde_json; // 使用 serde_json 来反序列化
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
@@ -72,6 +75,13 @@ async fn handle_client(
                     Ok(_) => (),
                 }
 
+                // debug!("recieve: {}",line);
+
+                // 反序列化
+                let qc_message: QcMessage = serde_json::from_str(&line).expect("Failed to deserialize");
+
+                info!("recieve: {:?}",qc_message);
+
                 if let Err(e)=tx.lock().await.send(line.clone()) {
                     error!("tx send Error: {}", e);
                 }
@@ -81,6 +91,9 @@ async fn handle_client(
 
                 match result {
                     Ok(value) => {
+
+
+
                         writer.write_all(value.as_bytes()).await?
                     },
                     Err(e) => {

@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
 
     let addr = "127.0.0.1:8080";
 
-    let result = QcServer::new(&addr).await;
+    let result = QcServer::new(addr).await;
     match result {
         Ok(server) => {
             if let Err(e) = server.start().await {

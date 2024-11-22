@@ -12,7 +12,9 @@ async fn main() -> Result<()> {
     }
     info!("init log4rs ok.");
 
-    let result = QcClient::open("127.0.0.1:8080").await;
+    let addr = "127.0.0.1:8080";
+
+    let result = QcClient::open(addr).await;
     if let Err(e) = result {
         error!("qc client open Error: {}", e);
     }
