@@ -24,8 +24,9 @@ impl QcClient {
                 Ok(line) = stdin_reader.next_line() => {
                     if let Some(line) = line {
                         let qc_message = QcMessage {
-                            nick_name: String::from("Alice"),
-                            message: String::from(&line),
+                            nick_name: "Alice".to_string(),
+                            message: (&line).to_string(),
+                            cmd: "".to_string(),
                         };
                         // 序列化为 Vec<u8>
                         // let serialized = bincode::serialize(&qc_message).expect("Failed to serialize");

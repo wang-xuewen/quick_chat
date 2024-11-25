@@ -37,7 +37,10 @@ impl QcServer {
 
             // 启动一个新的异步任务来处理每个连接
             tokio::spawn(async move {
-                if let Err(e) = handle_client(socket, tx).await {
+                if let Err(e) = handle_client(socket, tx)
+                    .await
+                    .context("handle client error")
+                {
                     error!("Client handler failed: {}", e);
                 }
             });
@@ -91,8 +94,6 @@ async fn handle_client(
 
                 match result {
                     Ok(value) => {
-
-
 
                         writer.write_all(value.as_bytes()).await?
                     },
