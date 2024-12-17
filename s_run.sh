@@ -2,6 +2,6 @@
 echo ""
 cd ./quick_chat_s
 # cargo run --quiet -p quick_chat_s
-cargo run
+cargo run -p quick_chat_s
 cd ..
 echo ""
