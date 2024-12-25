@@ -57,4 +57,5 @@ HTTP/1.1 401 Unauthorized
 
 | 值   | 错误消息                  | 说明   | http响应码 |
 | --- | --------------------- | ---- | ------- |
+| 100 | Authentication failed | 缺少参数 | 400     |
 | 101 | Authentication failed | 鉴权失败 | 401     |

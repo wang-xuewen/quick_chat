@@ -2,7 +2,8 @@ use axum::{
     routing::{get, MethodRouter},
     Router,
 };
-use log::info;
+// use log::info;
+use crate::qc_web::handler_auth;
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -26,10 +27,10 @@ impl RouteRegistry {
         router
     }
 }
-async fn index_handler() -> &'static str {
+async fn handler_index() -> &'static str {
     "Welcome to the Index Page!"
 }
-async fn fallback_handler() -> &'static str {
+async fn handler_fallback() -> &'static str {
     "404 Not Found"
 }
 
@@ -38,10 +39,11 @@ pub async fn start_web_server(ip: &str, port: u16) -> Result<(), Box<dyn Error>>
     let mut registry = RouteRegistry::new();
 
     // 注册路由
-    registry.register("/index.html", get(index_handler));
+    registry.register("/index.html", get(handler_index));
+    registry.register("/auth", get(handler_auth::handler_auth));
 
     // 构建应用路由
-    let app = registry.build_app().fallback(fallback_handler);
+    let app = registry.build_app().fallback(handler_fallback);
 
     // let add_str = format!("{}{}", ip, port);
     // 启动服务
