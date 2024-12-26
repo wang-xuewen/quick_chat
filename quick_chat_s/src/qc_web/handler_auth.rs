@@ -1,4 +1,4 @@
-use axum::{extract::Query, response::IntoResponse, Json};
+use axum::{extract::Query, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 
 // 定义登录请求和响应结构
@@ -21,15 +21,25 @@ pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoRespons
     if let (Some(nick_name), Some(encrypt_str)) = (params.nick_name, params.encrypt_str) {
         if nick_name == "admin" && encrypt_str == "password" {
             // 成功返回 token
-            Json(AuthResponse::Success {
-                token: "example_token_123".to_string(),
-            })
+            (
+                StatusCode::OK,
+                Json(AuthResponse::Success {
+                    token: "example_token_123".to_string(),
+                }),
+            )
         } else {
             // 用户名或密码错误
-            Json(AuthResponse::Error { err_no: 101 })
+            (
+                StatusCode::UNAUTHORIZED,
+                Json(AuthResponse::Error { err_no: 101 }),
+            )
         }
     } else {
         // 缺少必要参数
-        Json(AuthResponse::Error { err_no: 100 })
+        // Json(AuthResponse::Error { err_no: 100 })
+        (
+            StatusCode::BAD_REQUEST,
+            Json(AuthResponse::Error { err_no: 100 }),
+        )
     }
 }

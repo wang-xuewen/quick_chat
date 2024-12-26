@@ -1,4 +1,6 @@
 use axum::{
+    http::StatusCode,
+    response::IntoResponse,
     routing::{get, MethodRouter},
     Router,
 };
@@ -27,11 +29,11 @@ impl RouteRegistry {
         router
     }
 }
-async fn handler_index() -> &'static str {
-    "Welcome to the Index Page!"
+async fn handler_index() -> impl IntoResponse {
+    (StatusCode::OK, "Welcome to the Index Page!")
 }
-async fn handler_fallback() -> &'static str {
-    "404 Not Found"
+async fn handler_fallback() -> impl IntoResponse {
+    (StatusCode::NOT_FOUND, "404 Not Found")
 }
 
 pub async fn start_web_server(ip: &str, port: u16) -> Result<(), Box<dyn Error>> {
