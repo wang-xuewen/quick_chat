@@ -1,11 +1,24 @@
+// use axum::{
+//     http::StatusCode,
+//     response::IntoResponse,
+//     routing::{get, MethodRouter},
+//     Router,
+// };
+// // use log::info;
+// use crate::qc_web::handler_auth;
+// use std::collections::HashMap;
+// use std::error::Error;
+
+use crate::qc_web::handler_auth;
 use axum::{
-    http::StatusCode,
-    response::IntoResponse,
+    http::{Request, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{get, MethodRouter},
     Router,
 };
-// use log::info;
-use crate::qc_web::handler_auth;
+use log::info;
+use serde_urlencoded;
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -26,7 +39,7 @@ impl RouteRegistry {
         for (path, method) in &self.routes {
             router = router.route(path, method.clone());
         }
-        router
+        router.layer(middleware::from_fn(axum_middleware))
     }
 }
 async fn handler_index() -> impl IntoResponse {
@@ -55,4 +68,28 @@ pub async fn start_web_server(ip: &str, port: u16) -> Result<(), Box<dyn Error>>
         .await?;
 
     Ok(())
+}
+
+async fn axum_middleware<B>(req: Request<B>, next: Next<B>) -> Result<Response, StatusCode>
+where
+    B: Send + 'static, // 保证 B 是可发送的
+{
+    // 获取请求的 URL
+    let uri = req.uri().to_string();
+
+    // 提取查询参数
+    if let Some(query) = req.uri().query() {
+        // 将查询参数解析为 HashMap
+        let query_params: HashMap<String, String> =
+            serde_urlencoded::from_str(query).unwrap_or_default();
+
+        // 将 uri 和 query_params 打印在同一行
+        info!("Request URL: {} Query parameters: {:?}", uri, query_params);
+    } else {
+        // 如果没有查询参数，也打印请求的 URL
+        info!("Request URL: {} ", uri);
+    }
+
+    // 继续执行请求处理
+    Ok(next.run(req).await)
 }

@@ -1,0 +1,4 @@
+
+
+curl http://127.0.0.1:8080/index.html -w "  status code:%{http_code}\n"
+curl http://127.0.0.1:8080/auth?nick_name=admin&encrypt_str=password -w "  status code:%{http_code}\n"
