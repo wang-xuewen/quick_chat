@@ -2,13 +2,37 @@ mod common;
 mod qc_web;
 
 use anyhow::Result;
+use clap::Parser;
 use log::{error, info};
 use log4rs;
 use qc_web::web_server::start_web_server;
 use std::error::Error;
 
+#[derive(Parser)]
+struct Args {
+    /// Authentication key
+    #[arg(short = 'a', long, default_value = "default_key")]
+    auth_key: Option<String>,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    // 取得命令行参数
+    let args = Args::parse();
+    // 使用match模式匹配
+    match args.auth_key {
+        Some(auth_key) => {
+            println!("Auth key provided: {}", auth_key);
+            // 调用 config 模块的接口设置全局变量
+            common::set_auth_key(auth_key);
+        }
+        None => println!("No auth key provided"),
+    }
+
+    // 调用其他函数，访问全局变量
+    print_arg();
+
+    // 初始化日志系统
     if let Err(e) = log4rs::init_file("log4rs.yaml", Default::default()) {
         eprintln!("init log4rs Error: {}", e);
     }
@@ -29,4 +53,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+// 其他函数访问全局变量
+fn print_arg() {
+    let auth_key = common::get_auth_key();
+    eprintln!("auth key is: {}", auth_key);
 }
