@@ -18,7 +18,7 @@ use axum::{
     Router,
 };
 use log::info;
-use serde_urlencoded;
+// use serde_urlencoded;
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -78,17 +78,18 @@ where
     let uri = req.uri().to_string();
 
     // 提取查询参数
-    if let Some(query) = req.uri().query() {
-        // 将查询参数解析为 HashMap
-        let query_params: HashMap<String, String> =
-            serde_urlencoded::from_str(query).unwrap_or_default();
+    // if let Some(query) = req.uri().query() {
+    // let query_params: HashMap<String, String> =
+    //     serde_urlencoded::from_str(query).unwrap_or_default();
 
-        // 将 uri 和 query_params 打印在同一行
-        info!("Request URL: {} Query parameters: {:?}", uri, query_params);
-    } else {
-        // 如果没有查询参数，也打印请求的 URL
-        info!("Request URL: {} ", uri);
-    }
+    // 将 uri 和 query_params 打印在同一行
+    // info!("Request URL: {} Query parameters: {:?}", uri, query_params);
+    //     info!("Request URL: {} ", uri);
+    // } else {
+    //     info!("Request URL: {} ", uri);
+    // }
+
+    info!("Request URL: {} ", uri);
 
     // 继续执行请求处理
     Ok(next.run(req).await)
