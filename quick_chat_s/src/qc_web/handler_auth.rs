@@ -1,6 +1,6 @@
 use crate::common::{self, PRIVATE_KEY_STR};
 use axum::{extract::Query, http::StatusCode, response::IntoResponse, Json};
-use log::info;
+use log::{error, info};
 use rust_utils::decrypt_data;
 use serde::{Deserialize, Serialize};
 
@@ -27,9 +27,17 @@ pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoRespons
 
         info!("[auth] login user:{}", nick_name);
         info!("[auth] auth key from agent:{}", decrypted_data.as_str());
-        info!("[auth] server auth key:{}", common::get_auth_key().as_str());
 
-        if decrypted_data.as_str() == common::get_auth_key().as_str() {
+        let auth_key = common::get_auth_key();
+
+        if auth_key == "" {
+            error!("[auth] auth failed.");
+            // 用户名或密码错误
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(AuthResponse::Error { err_no: 102 }),
+            )
+        } else if decrypted_data.as_str() == auth_key {
             info!("[auth] auth ok.");
             // 成功返回 token
             (
@@ -39,7 +47,7 @@ pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoRespons
                 }),
             )
         } else {
-            info!("[auth] auth failed.");
+            error!("[auth] auth failed.");
             // 用户名或密码错误
             (
                 StatusCode::UNAUTHORIZED,
@@ -47,7 +55,7 @@ pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoRespons
             )
         }
     } else {
-        info!("[auth] bad request.");
+        error!("[auth] bad request.");
         // 缺少必要参数
         // Json(AuthResponse::Error { err_no: 100 })
         (

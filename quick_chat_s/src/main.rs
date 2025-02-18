@@ -24,13 +24,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Some(auth_key) => {
             println!("Auth key provided: {}", auth_key);
             // 调用 config 模块的接口设置全局变量
-            common::set_auth_key(auth_key);
+            if let Err(e) = common::set_auth_key(auth_key) {
+                eprintln!("Failed to set auth key: {}", e);
+                std::process::exit(2);
+            }
         }
-        None => println!("No auth key provided"),
+        None => {
+            eprintln!("No auth key provided");
+            std::process::exit(3);
+        }
     }
-
-    // 调用其他函数，访问全局变量
-    print_arg();
 
     // 初始化日志系统
     if let Err(e) = log4rs::init_file("log4rs.yaml", Default::default()) {
@@ -56,7 +59,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 }
 
 // 其他函数访问全局变量
-fn print_arg() {
-    let auth_key = common::get_auth_key();
-    eprintln!("auth key is: {}", auth_key);
-}
+// fn print_arg() {
+//     if let Err(e) = common::get_auth_key() {
+//         eprintln!("{}", e);
+//     }
+// }

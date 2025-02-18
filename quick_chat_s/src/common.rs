@@ -1,5 +1,7 @@
 //! 本模块存放所有全局对象定义以及各种常量、项目级别的通用函数等.
 //!
+use log::error;
+use std::error::Error;
 use std::sync::OnceLock;
 // 定义全局变量
 static AUTH_KEY: OnceLock<String> = OnceLock::new();
@@ -41,11 +43,28 @@ eY7i0K6c9dKEiAWBsvd3C8/ktcXSps8wjxGVH+X/2Re316biQfk6QV8=
 // -----END RSA PUBLIC KEY-----"#;
 
 // 提供公共接口设置全局变量
-pub fn set_auth_key(value: String) {
-    AUTH_KEY.set(value).expect("Failed to set auth key");
+pub fn set_auth_key(value: String) -> Result<(), Box<dyn Error>> {
+    AUTH_KEY.set(value)?;
+    Ok(())
 }
 
 // 提供公共接口获取全局变量
-pub fn get_auth_key() -> &'static String {
-    AUTH_KEY.get().expect("auth key not set")
+pub fn get_auth_key() -> &'static str {
+    // AUTH_KEY.get().map(|s| s.as_str()).unwrap_or("")
+    if let Some(key) = AUTH_KEY.get() {
+        key.as_str()
+    } else {
+        error!("Auth key not set, returning empty string.");
+        ""
+    }
 }
+// pub fn get_auth_key() -> &'static String {
+//     AUTH_KEY.get().expect("auth key not set")
+// }
+// pub fn get_auth_key() -> Result<&'static String, Box<dyn Error>> {
+//     // Option 类型的 ok_or_else 方法可以将 Option<T> 转换为 Result<T, E>
+//     // into() 是 Rust 中的一种通用转换方法，可以将字符串转换为实现了 Error trait 的类型。
+//     AUTH_KEY
+//         .get()
+//         .ok_or_else(|| "Failed to get auth key".into())
+// }
