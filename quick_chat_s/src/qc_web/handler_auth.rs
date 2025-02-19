@@ -30,14 +30,7 @@ pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoRespons
 
         let auth_key = common::get_auth_key();
 
-        if auth_key == "" {
-            error!("[auth] auth failed.");
-            // 用户名或密码错误
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(AuthResponse::Error { err_no: 102 }),
-            )
-        } else if decrypted_data.as_str() == auth_key {
+        if decrypted_data.as_str() == auth_key {
             info!("[auth] auth ok.");
             // 成功返回 token
             (

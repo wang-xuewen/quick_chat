@@ -882,8 +882,10 @@ name = "quick_chat_c"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "clap",
  "log",
  "log4rs",
+ "once_cell",
  "qc_lib",
  "serde",
  "serde_json",
