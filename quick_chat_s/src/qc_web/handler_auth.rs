@@ -2,6 +2,7 @@ use crate::common::{self, PRIVATE_KEY_STR};
 use axum::{extract::Query, http::StatusCode, response::IntoResponse, Json};
 use log::{error, info};
 use rust_utils::decrypt_data;
+use rust_utils::gen_rand;
 use serde::{Deserialize, Serialize};
 
 // 定义登录请求和响应结构
@@ -32,14 +33,10 @@ pub async fn handler_auth(Json(payload): Json<AuthRequest>) -> impl IntoResponse
     let auth_key = common::get_auth_key();
 
     if decrypted_data.as_str() == auth_key {
-        info!("[auth] auth ok.");
+        let token = gen_rand(6);
+        info!("[auth] auth ok.token:{}", token);
         // 成功返回 token
-        (
-            StatusCode::OK,
-            Json(AuthResponse::Success {
-                token: "example_token_123".to_string(),
-            }),
-        )
+        (StatusCode::OK, Json(AuthResponse::Success { token }))
     } else {
         error!("[auth] auth failed.");
         // 用户名或密码错误
