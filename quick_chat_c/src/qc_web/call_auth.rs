@@ -33,7 +33,7 @@ pub async fn call_auth(nick_name: &str, auth_key: &str) -> Result<String> {
     // 发送 POST 请求
     let client = reqwest::Client::new();
     let response = client
-        .post("https://127.0.0.1:8080/auth")
+        .post("http://127.0.0.1:8080/auth")
         .json(&request_body)
         .send()
         .await?;
