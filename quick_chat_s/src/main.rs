@@ -11,7 +11,7 @@ use std::error::Error;
 #[derive(Parser)]
 struct Args {
     /// Authentication key
-    #[arg(short = 'a', long, default_value = "default_key")]
+    #[arg(short = 'a', long, default_value = "")]
     auth_key: Option<String>,
 }
 

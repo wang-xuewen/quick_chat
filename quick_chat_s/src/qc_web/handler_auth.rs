@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize)]
 pub struct AuthRequest {
     nick_name: Option<String>,
-    encrypt_str: Option<String>,
+    auth_key_enc: Option<String>,
 }
 
 // 定义响应结构体
@@ -21,7 +21,7 @@ enum AuthResponse {
 
 pub async fn handler_auth(Query(params): Query<AuthRequest>) -> impl IntoResponse {
     // 模拟逻辑判断
-    if let (Some(nick_name), Some(encrypt_str)) = (params.nick_name, params.encrypt_str) {
+    if let (Some(nick_name), Some(encrypt_str)) = (params.nick_name, params.auth_key_enc) {
         let decrypted_data =
             decrypt_data(PRIVATE_KEY_STR, encrypt_str.as_str()).unwrap_or("".to_string());
 
