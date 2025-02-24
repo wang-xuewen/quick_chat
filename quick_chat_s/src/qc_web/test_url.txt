@@ -4,6 +4,6 @@ curl http://127.0.0.1:8080/index.html -w "  status code:%{http_code}\n"
 curl http://127.0.0.1:8080/auth?nick_name=admin&auth_key_enc=password -w "  status code:%{http_code}\n"
 curl http://127.0.0.1:8080/auth?nick_name=admin&auth_key_enc=Xv9CMLf6i0JRaxbBe16hBiA4c30ylkRmrkyIfKsKMec8OVb1dj9hYCW0p%2FMJLEqHeUJ0V00j2qPcT8u9HjKc1fmwqWFcZioWDm3fbCpa69IK0ILUzcGg9vM9UBPQb9wGjo2qsSd8TdQi9w%2F%2FWzlX%2BUMFuVbrrcJhnnhHRhg8C1oKbW2XiU4oMirOwgtr8wjHMd91vd%2FRVJkTZGQLksbx8BgNXN14gWNrSSax0FoF82cDCvyGvOTVaf2nEB0nddoiAT%2FqA7teXxMSx%2BTSTqpQKcKRaD0%2FBi8ge3zwzCUqWv%2B1uEcWO0Zx%2FR4S4PSpMCncL3DIIqMLByKhAP2ATAHC9g%3D%3D -w "  status code:%{http_code}\n"
 
-curl -X POST "http://127.0.0.1:3000/auth" \
+curl -X POST "http://127.0.0.1:8080/auth" \
      -H "Content-Type: application/json" \
      -d '{"nick_name": "ZongGe", "auth_key_enc": "encrypted_key"}'

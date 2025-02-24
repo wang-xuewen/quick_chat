@@ -1,6 +1,7 @@
 use crate::common::{self, PUBLIC_KEY_STR};
 use anyhow::{anyhow, Result};
 // use reqwest::Error;
+use log::info;
 use rust_utils::encrypt_data;
 use serde::{Deserialize, Serialize};
 
@@ -23,12 +24,6 @@ pub async fn call_auth(nick_name: &str, auth_key: &str) -> Result<String> {
         return Err(anyhow!("encryption auth key failed."));
     }
 
-    // let auth_key_enc = encrypt_data(PUBLIC_KEY_STR, auth_key).unwrap_or_else(|_| "".to_string());
-    // if auth_key_enc.is_empty() {
-    //     // 使用 `anyhow!` 返回错误并返回
-    //     return Err(anyhow!("Something went wrong"));
-    // }
-
     // 创建请求体
     let request_body = ApiRequest {
         nick_name: nick_name.to_string(),
@@ -46,6 +41,7 @@ pub async fn call_auth(nick_name: &str, auth_key: &str) -> Result<String> {
     // 解析 JSON 响应
     let api_response: ApiResponse = response.json().await?;
 
+    info!("call auth ok.");
     // 返回 token
     Ok(api_response.token)
 }

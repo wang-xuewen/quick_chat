@@ -14,7 +14,7 @@ use axum::{
     http::{Request, StatusCode},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{get, MethodRouter},
+    routing::{get, post, MethodRouter},
     Router,
 };
 use log::info;
@@ -55,7 +55,7 @@ pub async fn start_web_server(ip: &str, port: u16) -> Result<(), Box<dyn Error>>
 
     // 注册路由
     registry.register("/index.html", get(handler_index));
-    registry.register("/auth", get(handler_auth::handler_auth));
+    registry.register("/auth", post(handler_auth::handler_auth));
 
     // 构建应用路由
     let app = registry.build_app().fallback(handler_fallback);
