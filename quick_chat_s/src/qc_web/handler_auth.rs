@@ -4,6 +4,7 @@ use log::{error, info};
 use rust_utils::decrypt_data;
 use rust_utils::gen_rand;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 // 定义登录请求和响应结构
 #[derive(Debug, Deserialize)]
@@ -21,8 +22,11 @@ enum AuthResponse {
 }
 
 pub async fn handler_auth(Json(payload): Json<AuthRequest>) -> impl IntoResponse {
-    info!("nick name:{}", payload.nick_name);
-    info!("auth_key_enc:{}", payload.auth_key_enc);
+    // info!("nick name:{}", payload.nick_name);
+    // info!("auth_key_enc:{}", payload.auth_key_enc);
+
+    // 模拟一些较长的操作
+    // tokio::time::sleep(Duration::from_secs(35)).await;
 
     let decrypted_data =
         decrypt_data(PRIVATE_KEY_STR, payload.auth_key_enc.as_str()).unwrap_or("".to_string());

@@ -4,13 +4,14 @@ use anyhow::{anyhow, Result};
 use log::info;
 use rust_utils::encrypt_data;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct ApiResponse {
     token: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 struct ApiRequest {
     nick_name: String,
     auth_key_enc: String,
@@ -35,13 +36,30 @@ pub async fn call_auth(nick_name: &str, auth_key: &str) -> Result<String> {
     let response = client
         .post("http://127.0.0.1:8080/auth")
         .json(&request_body)
+        .timeout(Duration::from_secs(30)) // 设置超时时间为 30 秒
         .send()
         .await?;
 
     // 解析 JSON 响应
     let api_response: ApiResponse = response.json().await?;
+    // match response {
+    //     Ok(resp) => {
+    //         // 解析 JSON 响应
+    //         let api_response: ApiResponse = resp.json().await?;
+    //         println!("Response: {:?}", api_response);
+    //         Ok(api_response.token)
+    //     }
+    //     Err(err) => {
+    //         if err.is_timeout() {
+    //             println!("Request timed out after 30 seconds");
+    //         } else {
+    //             println!("Request failed: {:?}", err);
+    //         }
+    //         Err(err)
+    //     }
+    // }
 
-    info!("call auth ok.");
+    // info!("call auth ok.");
     // 返回 token
     Ok(api_response.token)
 }
