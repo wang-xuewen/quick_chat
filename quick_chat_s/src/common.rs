@@ -1,10 +1,15 @@
 //! 本模块存放所有全局对象定义以及各种常量、项目级别的通用函数等.
 //!
 use log::error;
+use rust_utils::easy_map::EasyMap;
 use std::error::Error;
 use std::sync::OnceLock;
+use std::time::Duration;
+
 // 定义全局变量
 static AUTH_KEY: OnceLock<String> = OnceLock::new();
+static GLOBAL_MAP: OnceLock<EasyMap<String, String>> = OnceLock::new();
+
 pub static PRIVATE_KEY_STR: &str = r#"-----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEA4gRE9HOERcEUhKSNgqYtnVW9LIy+b5qM+jTEDoi956DhTytI
 Ax+phOOrC/cI68+XXnPFZsNHy7ZxC2nONEzNYuS7ev9qxAxhhoRYLXDhsuqVsPg8
@@ -58,6 +63,11 @@ pub fn get_auth_key() -> &'static str {
         ""
     }
 }
+
+pub fn get_global_map() -> &'static EasyMap<String, String> {
+    GLOBAL_MAP.get_or_init(|| EasyMap::new(Duration::from_secs(600)))
+}
+
 // pub fn get_auth_key() -> &'static String {
 //     AUTH_KEY.get().expect("auth key not set")
 // }

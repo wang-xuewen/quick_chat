@@ -1,4 +1,4 @@
-use crate::common::{self, PRIVATE_KEY_STR};
+use crate::common::{self, get_global_map, PRIVATE_KEY_STR};
 use axum::{extract::Query, http::StatusCode, response::IntoResponse, Json};
 use log::{error, info};
 use rust_utils::decrypt_data;
@@ -39,6 +39,15 @@ pub async fn handler_auth(Json(payload): Json<AuthRequest>) -> impl IntoResponse
     if decrypted_data.as_str() == auth_key {
         let token = gen_rand(6);
         info!("[auth] auth ok.token:{}", token);
+
+        // 保存token，过期时间：1小时
+        let map = get_global_map();
+        map.set(
+            payload.nick_name,
+            token.clone(),
+            Some(Duration::from_secs(60 * 60)),
+        );
+
         // 成功返回 token
         (StatusCode::OK, Json(AuthResponse::Success { token }))
     } else {

@@ -1,1 +1,190 @@
 
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
+
+struct ExpirableValue<V> {
+    value: V,
+    expires_at: Option<Instant>,
+}
+
+impl<V> ExpirableValue<V> {
+    fn new(value: V, ttl: Option<Duration>) -> Self {
+        let expires_at = ttl.map(|duration| Instant::now() + duration);
+        ExpirableValue { value, expires_at }
+    }
+
+    fn is_expired(&self) -> bool {
+        self.expires_at.map_or(false, |expires_at| expires_at <= Instant::now())
+    }
+}
+
+struct SafeMap<K, V> {
+    map: Mutex<HashMap<K, ExpirableValue<V>>>,
+}
+
+impl<K, V> SafeMap<K, V>
+where
+    K: Eq + std::hash::Hash + Clone,
+{
+    fn new() -> Self {
+        SafeMap {
+            map: Mutex::new(HashMap::new()),
+        }
+    }
+
+    fn set(&self, key: K, value: V, ttl: Option<Duration>) {
+        let mut map = self.map.lock().unwrap();
+        map.insert(key, ExpirableValue::new(value, ttl));
+    }
+
+    fn get(&self, key: &K) -> Option<V>
+    where
+        V: Clone,
+    {
+        let mut map = self.map.lock().unwrap();
+        if let Some(expirable_value) = map.get(key) {
+            if expirable_value.is_expired() {
+                map.remove(key);
+                None
+            } else {
+                Some(expirable_value.value.clone())
+            }
+        } else {
+            None
+        }
+    }
+
+    fn remove(&self, key: &K) -> Option<V>
+    where
+        V: Clone,
+    {
+        let mut map = self.map.lock().unwrap();
+        map.remove(key).map(|expirable_value| expirable_value.value)
+    }
+}
+
+fn main() {
+    let map = Arc::new(SafeMap::new());
+
+    // 设置一个永不过期的键值对
+    map.set("key1".to_string(), "value1".to_string(), None);
+
+    // 设置一个5秒后过期的键值对
+    map.set("key2".to_string(), "value2".to_string(), Some(Duration::from_secs(5)));
+
+    // 获取键值对
+    if let Some(value) = map.get(&"key1".to_string()) {
+        println!("key1: {}", value);
+    } else {
+        println!("key1 not found or expired");
+    }
+
+    if let Some(value) = map.get(&"key2".to_string()) {
+        println!("key2: {}", value);
+    } else {
+        println!("key2 not found or expired");
+    }
+
+    // 等待6秒后再次获取键值对
+    std::thread::sleep(Duration::from_secs(6));
+
+    if let Some(value) = map.get(&"key2".to_string()) {
+        println!("key2: {}", value);
+    } else {
+        println!("key2 not found or expired");
+    }
+}
+
+
+use dashmap::DashMap;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::spawn;
+use tokio::time::sleep;
+
+/// 线程安全且支持 key 过期的 Map 组件
+#[derive(Clone)]
+pub struct ExpiringMap<K, V> {
+    map: Arc<DashMap<K, (V, Instant)>>, // 存储 key-value 和过期时间
+    ttl: Duration,                       // key 的默认过期时间
+}
+
+impl<K, V> ExpiringMap<K, V>
+where
+    K: Eq + std::hash::Hash + Clone + Send + Sync + 'static,
+    V: Clone + Send + Sync + 'static,
+{
+    /// 创建一个新的 ExpiringMap
+    pub fn new(ttl: Duration) -> Self {
+        let map = Arc::new(DashMap::new());
+        let this = Self { map, ttl };
+
+        // 启动一个后台任务，定期清理过期的 key
+        this.start_cleanup_task();
+        this
+    }
+
+    /// 插入一个 key-value 对
+    pub fn insert(&self, key: K, value: V) {
+        let expires_at = Instant::now() + self.ttl;
+        self.map.insert(key, (value, expires_at));
+    }
+
+    /// 获取一个 key 的值（如果未过期）
+    pub fn get(&self, key: &K) -> Option<V> {
+        self.map.get(key).and_then(|entry| {
+            let (value, expires_at) = entry.value();
+            if Instant::now() < *expires_at {
+                Some(value.clone())
+            } else {
+                None
+            }
+        })
+    }
+
+    /// 移除一个 key
+    pub fn remove(&self, key: &K) {
+        self.map.remove(key);
+    }
+
+    /// 启动后台任务，定期清理过期的 key
+    fn start_cleanup_task(&self) {
+        let map = self.map.clone();
+        let ttl = self.ttl;
+
+        spawn(async move {
+            loop {
+                sleep(ttl).await; // 每隔 ttl 时间清理一次
+                let now = Instant::now();
+                map.retain(|_, (_, expires_at)| *expires_at > now); // 移除过期的 key
+            }
+        });
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    // 创建一个 ExpiringMap，设置 key 的过期时间为 5 秒
+    let map = ExpiringMap::new(Duration::from_secs(5));
+
+    // 插入一个 key-value 对
+    map.insert("key1", "value1");
+
+    // 立即获取 key1 的值
+    if let Some(value) = map.get(&"key1") {
+        println!("Found key1: {}", value); // 输出: Found key1: value1
+    } else {
+        println!("key1 not found or expired");
+    }
+
+    // 等待 6 秒，让 key1 过期
+    sleep(Duration::from_secs(6)).await;
+
+    // 再次获取 key1 的值
+    if let Some(value) = map.get(&"key1") {
+        println!("Found key1: {}", value);
+    } else {
+        println!("key1 not found or expired"); // 输出: key1 not found or expired
+    }
+}

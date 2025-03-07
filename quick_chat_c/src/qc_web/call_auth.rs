@@ -42,24 +42,8 @@ pub async fn call_auth(nick_name: &str, auth_key: &str) -> Result<String> {
 
     // 解析 JSON 响应
     let api_response: ApiResponse = response.json().await?;
-    // match response {
-    //     Ok(resp) => {
-    //         // 解析 JSON 响应
-    //         let api_response: ApiResponse = resp.json().await?;
-    //         println!("Response: {:?}", api_response);
-    //         Ok(api_response.token)
-    //     }
-    //     Err(err) => {
-    //         if err.is_timeout() {
-    //             println!("Request timed out after 30 seconds");
-    //         } else {
-    //             println!("Request failed: {:?}", err);
-    //         }
-    //         Err(err)
-    //     }
-    // }
 
-    // info!("call auth ok.");
+    info!("call auth ok.");
     // 返回 token
     Ok(api_response.token)
 }
