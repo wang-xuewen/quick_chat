@@ -35,7 +35,13 @@ async fn main() -> Result<()> {
 
     // 调用认证接口
     match call_auth::call_auth(common::get_nick_name(), common::get_auth_key()).await {
-        Ok(token) => println!("Received token: {}", token),
+        Ok(token) => {
+            println!("Received token: {}", token);
+            if let Err(e) = common::set_auth_token(token) {
+                eprintln!("Failed to set auth token: {}", e);
+                std::process::exit(1);
+            }
+        }
         Err(e) => eprintln!("Error: {}", e),
     }
 

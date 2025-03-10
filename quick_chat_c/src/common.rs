@@ -5,6 +5,7 @@ use std::sync::OnceLock;
 static HOST_IP: OnceLock<String> = OnceLock::new();
 static AUTH_KEY: OnceLock<String> = OnceLock::new();
 static NICK_NAME: OnceLock<String> = OnceLock::new();
+static AUTH_TOKEN: OnceLock<String> = OnceLock::new();
 
 pub static PUBLIC_KEY_STR: &str = r#"-----BEGIN RSA PUBLIC KEY-----
 MIIBCgKCAQEA4gRE9HOERcEUhKSNgqYtnVW9LIy+b5qM+jTEDoi956DhTytIAx+p
@@ -62,6 +63,20 @@ pub fn get_nick_name() -> &'static str {
         key.as_str()
     } else {
         error!("nick name not set, returning empty string.");
+        ""
+    }
+}
+
+pub fn set_auth_token(value: String) -> Result<(), Box<dyn Error>> {
+    AUTH_TOKEN.set(value)?;
+    Ok(())
+}
+
+pub fn get_auth_token() -> &'static str {
+    if let Some(key) = AUTH_TOKEN.get() {
+        key.as_str()
+    } else {
+        error!("auth token not set, returning empty string.");
         ""
     }
 }

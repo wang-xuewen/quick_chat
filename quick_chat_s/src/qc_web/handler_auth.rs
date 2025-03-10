@@ -43,8 +43,8 @@ pub async fn handler_auth(Json(payload): Json<AuthRequest>) -> impl IntoResponse
         // 保存token，过期时间：1小时
         let map = get_global_map();
         map.set(
-            payload.nick_name,
             token.clone(),
+            payload.nick_name,
             Some(Duration::from_secs(60 * 60)),
         );
 
