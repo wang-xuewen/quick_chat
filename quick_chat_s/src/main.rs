@@ -1,10 +1,12 @@
 mod common;
+mod qc_server;
 mod qc_web;
 
 use anyhow::Result;
 use clap::Parser;
 use log::{error, info};
 use log4rs;
+use qc_server::qc_server::start_qc_server;
 use qc_web::web_server::start_web_server;
 use std::error::Error;
 
@@ -41,26 +43,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     info!("init log4rs ok.");
 
-    let ip = "127.0.0.1";
-    let port = 8080;
+    let ip_web = "127.0.0.1".to_string();
+    let port_web = 8080;
+
+    let ip_qc = "127.0.0.1".to_string();
+    let port_qc = 9080;
 
     // start_web_server("127.0.0.1", 8080).await?;
-    match start_web_server(ip, port).await {
-        Ok(()) => {
-            info!("Web server started successfully on {}:{}", ip, port)
-        }
-        Err(e) => {
-            error!("Error starting web server: {}", e);
-            std::process::exit(1);
-        }
-    }
+    // match start_web_server(ip, port).await {
+    //     Ok(()) => {
+    //         info!("Web server started successfully on {}:{}", ip, port)
+    //     }
+    //     Err(e) => {
+    //         error!("Error starting web server: {}", e);
+    //         std::process::exit(1);
+    //     }
+    // }
 
+    let web_server = tokio::spawn(async move {
+        if let Err(e) = start_web_server(ip_web, port_web).await {
+            error!("web server error: {}", e);
+        }
+    });
+    let qc_server = tokio::spawn(async move {
+        if let Err(e) = start_qc_server(ip_qc, port_qc).await {
+            error!("web server error: {}", e);
+        }
+    });
+
+    tokio::select! {
+        _ = web_server => {},
+        _ = qc_server => {}
+    }
     Ok(())
 }
-
-// 其他函数访问全局变量
-// fn print_arg() {
-//     if let Err(e) = common::get_auth_key() {
-//         eprintln!("{}", e);
-//     }
-// }

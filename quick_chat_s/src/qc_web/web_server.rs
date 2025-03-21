@@ -49,7 +49,7 @@ async fn handler_fallback() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "404 Not Found")
 }
 
-pub async fn start_web_server(ip: &str, port: u16) -> Result<(), Box<dyn Error>> {
+pub async fn start_web_server(ip: String, port: u16) -> Result<(), Box<dyn Error>> {
     // 创建路由注册器
     let mut registry = RouteRegistry::new();
 

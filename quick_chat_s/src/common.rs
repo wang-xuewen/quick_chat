@@ -6,6 +6,8 @@ use std::error::Error;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+pub const TIMEOUT_AUTH: u64 = 60;
+
 // 定义全局变量
 static AUTH_KEY: OnceLock<String> = OnceLock::new();
 static GLOBAL_MAP: OnceLock<EasyMap<String, String>> = OnceLock::new();

@@ -1,2 +1,2 @@
-agetn 调用 api auth，未完
-web server增加30秒超时机制
+实现对话服务器和client
+qc_server需要校验token以及超时等待机制
